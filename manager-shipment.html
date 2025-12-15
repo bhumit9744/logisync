@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+  body {
+    opacity: 0;
+    transition: opacity 0.4s ease-in-out;
+  }
+
+  body.page-loaded {
+    opacity: 1;
+  }
+</style>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogiSync - Shipments</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Orbitron', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            blue: '#2563eb', // Enterprise Blue
+                            cyan: '#06b6d4', // Clean Cyan
+                            bg: '#f1f5f9',   // Slate 100
+                            card: '#ffffff', // White
+                            text: '#0f172a', // Slate 900
+                            muted: '#64748b' // Slate 500
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Dashboard Card Base Style */
+        .dash-card {
+            background-color: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease-in-out;
+        }
+        .dash-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+            border-color: #cbd5e1;
+        }
+
+        /* Table Styles */
+        .table-head {
+            background-color: #f8fafc;
+            color: #475569;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        /* Status Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.6rem;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .badge-green { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+        .badge-blue { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
+        .badge-orange { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
+        .badge-red { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+        .badge-yellow { background: #fef9c3; color: #a16207; border: 1px solid #fde047; }
+
+        /* Map Placeholder Pattern */
+        .map-container {
+            background-color: #e5e7eb;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239ca3af' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Slide-over Panel Animation */
+        .slide-over {
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(100%);
+        }
+        .slide-over.open {
+            transform: translateX(0);
+        }
+        .backdrop {
+            transition: opacity 0.3s ease-in-out;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .backdrop.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Page Transition */
+        body {
+            transition: opacity 0.5s ease;
+            opacity: 1;
+        }
+        body.fade-out-active {
+            opacity: 0;
+        }
+    </style>
+</head>
+<body class="bg-brand-bg text-brand-text font-sans antialiased min-h-screen">
+    <div class="h-20"></div>
+    <nav>
+  <a href="#" onclick="smoothNavigate('manager-dashboard.html')">Dashboard</a>
+  <a href="#" onclick="smoothNavigate('manager-shipment.html')">Shipments</a>
+  <a href="#" onclick="smoothNavigate('managers-driver.html')">Drivers</a>
+  <a href="#" onclick="smoothNavigate('managers-payment.html')">Payments</a>
+  <a href="#" onclick="smoothNavigate('managers-sustainability.html')">Sustainability</a>
+</nav>
+
+
+
+    <!-- 1️⃣ FIXED TOP NAVIGATION BAR (Reused) -->
+    <nav class="fixed top-0 left-0 w-full bg-white shadow-md z-50">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+
+    <!-- Logo -->
+    <div class="font-bold text-xl text-cyan-600">
+      LogiSync
+    </div>
+
+    <!-- Links -->
+    <div class="flex gap-6 font-medium text-gray-700">
+      <a href="manager-dashboard.html" class="hover:text-cyan-600">Dashboard</a>
+      <a href="manager-shipment.html" class="hover:text-cyan-600">Shipments</a>
+      <a href="managers-driver.html" class="hover:text-cyan-600">Drivers</a>
+      <a href="managers-payment.html" class="hover:text-cyan-600">Payments</a>
+      <a href="managers-sustainability.html" class="hover:text-cyan-600">Sustainability</a>
+    </div>
+
+    <!-- Logout -->
+    <button onclick="window.location.href='firstpage.html'"
+      class="text-sm px-4 py-2 rounded bg-cyan-600 text-white hover:bg-cyan-700">
+      Logout
+    </button>
+
+  </div>
+</nav>
+
+
+    <!-- MAIN CONTENT WRAPPER -->
+    <main class="pt-24 pb-12 px-6 max-w-[1600px] mx-auto space-y-6">
+
+        <!-- 2️⃣ PAGE HEADER -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900 font-display">Shipments Overview</h2>
+                <p class="text-sm text-gray-500">Track, monitor, and manage all logistics operations in real time.</p>
+            </div>
+            <button class="px-5 py-2.5 bg-brand-blue text-white rounded-lg font-medium shadow-md hover:bg-blue-700 transition-colors flex items-center gap-2">
+                <i class="fas fa-plus"></i> Create Shipment
+            </button>
+        </div>
+
+        <!-- 3️⃣ SHIPMENT KPIs -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            <div class="dash-card p-4">
+                <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Total Shipments</p>
+                <div class="flex justify-between items-end mt-1">
+                    <h3 class="text-2xl font-bold text-gray-900">3,482</h3>
+                    <i class="fas fa-boxes text-gray-300 text-xl"></i>
+                </div>
+            </div>
+            <div class="dash-card p-4">
+                <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Pending</p>
+                <div class="flex justify-between items-end mt-1">
+                    <h3 class="text-2xl font-bold text-gray-900">42</h3>
+                    <i class="fas fa-hourglass-half text-orange-400 text-xl"></i>
+                </div>
+            </div>
+            <div class="dash-card p-4">
+                <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">In-Transit</p>
+                <div class="flex justify-between items-end mt-1">
+                    <h3 class="text-2xl font-bold text-gray-900">185</h3>
+                    <i class="fas fa-shipping-fast text-brand-blue text-xl"></i>
+                </div>
+            </div>
+            <div class="dash-card p-4">
+                <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Delivered</p>
+                <div class="flex justify-between items-end mt-1">
+                    <h3 class="text-2xl font-bold text-gray-900">3,210</h3>
+                    <i class="fas fa-check-circle text-green-500 text-xl"></i>
+                </div>
+            </div>
+            <div class="dash-card p-4 border-l-4 border-l-red-400">
+                <p class="text-[11px] font-bold text-red-600 uppercase tracking-wide">Delayed</p>
+                <div class="flex justify-between items-end mt-1">
+                    <h3 class="text-2xl font-bold text-gray-900">15</h3>
+                    <i class="fas fa-exclamation-triangle text-red-400 text-xl"></i>
+                </div>
+            </div>
+            <div class="dash-card p-4 bg-gradient-to-br from-green-50 to-white">
+                <p class="text-[11px] font-bold text-green-700 uppercase tracking-wide">Avg. Carbon/Trip</p>
+                <div class="flex justify-between items-end mt-1">
+                    <h3 class="text-2xl font-bold text-gray-900">12kg</h3>
+                    <i class="fas fa-leaf text-green-500 text-xl"></i>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4️⃣ FILTERS & SEARCH -->
+        <section class="dash-card p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div class="flex-1 w-full md:w-auto relative">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input type="text" placeholder="Filter by Order ID, Customer, or Driver..." class="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-all">
+            </div>
+            
+            <div class="flex flex-wrap gap-3 w-full md:w-auto justify-end">
+                <select class="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 bg-white focus:outline-none focus:border-brand-blue">
+                    <option>Status: All</option>
+                    <option>Status: Pending</option>
+                    <option>Status: In-Transit</option>
+                    <option>Status: Delayed</option>
+                </select>
+                <select class="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 bg-white focus:outline-none focus:border-brand-blue">
+                    <option>Date: Today</option>
+                    <option>Date: This Week</option>
+                    <option>Date: This Month</option>
+                </select>
+                <select class="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 bg-white focus:outline-none focus:border-brand-blue">
+                    <option>Carbon: All</option>
+                    <option>Carbon: High Impact</option>
+                    <option>Carbon: Low Impact</option>
+                </select>
+                <button class="px-3 py-2 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50"><i class="fas fa-filter"></i></button>
+                <button class="px-3 py-2 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50"><i class="fas fa-download"></i></button>
+            </div>
+        </section>
+
+        <!-- 5️⃣ SHIPMENTS TABLE -->
+        <section class="dash-card overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead class="table-head">
+                        <tr>
+                            <th class="px-6 py-4">Order ID</th>
+                            <th class="px-6 py-4">Customer</th>
+                            <th class="px-6 py-4">Driver & Vehicle</th>
+                            <th class="px-6 py-4">Route</th>
+                            <th class="px-6 py-4">Status</th>
+                            <th class="px-6 py-4">ETA</th>
+                            <th class="px-6 py-4">Distance</th>
+                            <th class="px-6 py-4">Carbon Impact</th>
+                            <th class="px-6 py-4 text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 text-sm text-gray-600 bg-white">
+                        <!-- Row 1 -->
+                        <tr class="hover:bg-gray-50 transition-colors cursor-pointer group">
+                            <td class="px-6 py-4 font-bold text-brand-blue">#ORD-9921</td>
+                            <td class="px-6 py-4">
+                                <div class="font-medium text-gray-900">Amazon Logistics</div>
+                                <div class="text-xs text-gray-400">Prime Delivery</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-6 h-6 rounded-full bg-gray-200 overflow-hidden"><img src="https://ui-avatars.com/api/?name=Ravi+K&background=random" /></div>
+                                    <div>
+                                        <div class="font-medium text-gray-900">Ravi Kumar</div>
+                                        <div class="text-xs text-gray-400">MH-04-AB-1234</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex flex-col text-xs">
+                                    <span class="text-gray-900 font-medium">Mumbai</span>
+                                    <span class="text-gray-400"><i class="fas fa-arrow-down text-[10px]"></i> Pune</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4"><span class="badge badge-blue">In Transit</span></td>
+                            <td class="px-6 py-4">Today, 4:00 PM</td>
+                            <td class="px-6 py-4">148 km</td>
+                            <td class="px-6 py-4"><span class="badge badge-green text-[10px]">LOW (EV)</span></td>
+                            <td class="px-6 py-4 text-right">
+                                <button onclick="openPanel()" class="text-gray-400 hover:text-brand-blue px-2"><i class="fas fa-eye"></i></button>
+                            </td>
+                        </tr>
+
+                        <!-- Row 2 -->
+                        <tr class="hover:bg-gray-50 transition-colors bg-red-50/20">
+                            <td class="px-6 py-4 font-bold text-brand-blue">#ORD-9922</td>
+                            <td class="px-6 py-4">
+                                <div class="font-medium text-gray-900">Flipkart Cart</div>
+                                <div class="text-xs text-gray-400">Standard</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-6 h-6 rounded-full bg-gray-200 overflow-hidden"><img src="https://ui-avatars.com/api/?name=Amit+S&background=random" /></div>
+                                    <div>
+                                        <div class="font-medium text-gray-900">Amit Singh</div>
+                                        <div class="text-xs text-gray-400">MH-12-CD-5678</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex flex-col text-xs">
+                                    <span class="text-gray-900 font-medium">Delhi</span>
+                                    <span class="text-gray-400"><i class="fas fa-arrow-down text-[10px]"></i> Jaipur</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4"><span class="badge badge-orange">Pending</span></td>
+                            <td class="px-6 py-4 text-red-500 font-medium">Delayed 2h</td>
+                            <td class="px-6 py-4">280 km</td>
+                            <td class="px-6 py-4"><span class="badge badge-red text-[10px]">HIGH (DIESEL)</span></td>
+                            <td class="px-6 py-4 text-right">
+                                <button onclick="openPanel()" class="text-gray-400 hover:text-brand-blue px-2"><i class="fas fa-eye"></i></button>
+                            </td>
+                        </tr>
+
+                        <!-- Row 3 -->
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 font-bold text-brand-blue">#ORD-9923</td>
+                            <td class="px-6 py-4">
+                                <div class="font-medium text-gray-900">Myntra Hub</div>
+                                <div class="text-xs text-gray-400">Express</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-6 h-6 rounded-full bg-gray-200 overflow-hidden"><img src="https://ui-avatars.com/api/?name=John+D&background=random" /></div>
+                                    <div>
+                                        <div class="font-medium text-gray-900">John Doe</div>
+                                        <div class="text-xs text-gray-400">KA-01-HH-9012</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex flex-col text-xs">
+                                    <span class="text-gray-900 font-medium">Bangalore</span>
+                                    <span class="text-gray-400"><i class="fas fa-arrow-down text-[10px]"></i> Mysuru</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4"><span class="badge badge-green">Delivered</span></td>
+                            <td class="px-6 py-4">Yesterday</td>
+                            <td class="px-6 py-4">145 km</td>
+                            <td class="px-6 py-4"><span class="badge badge-yellow text-[10px]">MED (CNG)</span></td>
+                            <td class="px-6 py-4 text-right">
+                                <button onclick="openPanel()" class="text-gray-400 hover:text-brand-blue px-2"><i class="fas fa-eye"></i></button>
+                            </td>
+                        </tr>
+                         <!-- Row 4 -->
+                         <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 font-bold text-brand-blue">#ORD-9924</td>
+                            <td class="px-6 py-4">
+                                <div class="font-medium text-gray-900">Reliance Digital</div>
+                                <div class="text-xs text-gray-400">Bulk</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-6 h-6 rounded-full bg-gray-200 overflow-hidden"><img src="https://ui-avatars.com/api/?name=Vikram+S&background=random" /></div>
+                                    <div>
+                                        <div class="font-medium text-gray-900">Vikram S</div>
+                                        <div class="text-xs text-gray-400">GJ-05-AA-1122</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex flex-col text-xs">
+                                    <span class="text-gray-900 font-medium">Ahmedabad</span>
+                                    <span class="text-gray-400"><i class="fas fa-arrow-down text-[10px]"></i> Surat</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4"><span class="badge badge-blue">In Transit</span></td>
+                            <td class="px-6 py-4">Tomorrow, 10 AM</td>
+                            <td class="px-6 py-4">260 km</td>
+                            <td class="px-6 py-4"><span class="badge badge-green text-[10px]">LOW (EV)</span></td>
+                            <td class="px-6 py-4 text-right">
+                                <button onclick="openPanel()" class="text-gray-400 hover:text-brand-blue px-2"><i class="fas fa-eye"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Pagination -->
+            <div class="px-6 py-3 border-t border-gray-100 flex items-center justify-between bg-gray-50">
+                <span class="text-xs text-gray-500">Showing 1-4 of 42 shipments</span>
+                <div class="flex gap-2">
+                    <button class="px-3 py-1 border border-gray-300 bg-white rounded-md text-xs font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50">Prev</button>
+                    <button class="px-3 py-1 border border-gray-300 bg-white rounded-md text-xs font-medium text-gray-600 hover:bg-gray-50">Next</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7️⃣ & 8️⃣ MAP & ALERTS GRID -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- 7️⃣ Shipment Route Preview -->
+            <div class="lg:col-span-2 dash-card p-1 flex flex-col">
+                <div class="bg-gray-50 p-4 border-b border-gray-100 rounded-t-lg">
+                    <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                        <i class="fas fa-map-marked-alt text-brand-blue"></i> Route Preview
+                    </h3>
+                </div>
+                <div class="map-container flex-1 min-h-[350px] relative rounded-b-lg">
+                    <!-- Fake Route -->
+                    <svg class="absolute inset-0 w-full h-full pointer-events-none">
+                        <path d="M 100 250 Q 300 50 600 200" stroke="#3b82f6" stroke-width="3" fill="none" stroke-dasharray="5,5" />
+                        <circle cx="100" cy="250" r="5" fill="#3b82f6" />
+                        <circle cx="600" cy="200" r="5" fill="#10b981" />
+                    </svg>
+                    <!-- Markers -->
+                    <div class="absolute top-[200px] left-[600px] transform -translate-x-1/2 -translate-y-1/2">
+                        <div class="bg-white px-2 py-1 rounded shadow text-xs font-bold whitespace-nowrap mb-1">Drop Location</div>
+                        <i class="fas fa-map-marker-alt text-green-500 text-2xl drop-shadow-md"></i>
+                    </div>
+                    <div class="absolute top-[250px] left-[100px] transform -translate-x-1/2 -translate-y-1/2">
+                        <div class="bg-white px-2 py-1 rounded shadow text-xs font-bold whitespace-nowrap mb-1">Pickup</div>
+                        <i class="fas fa-circle text-brand-blue text-sm border-2 border-white shadow-md rounded-full"></i>
+                    </div>
+                    <div class="absolute top-[100px] left-[350px]">
+                        <div class="bg-brand-blue text-white px-2 py-1 rounded shadow text-[10px] font-bold flex items-center gap-1">
+                            <i class="fas fa-truck"></i> #ORD-9921
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8️⃣ Alerts Panel -->
+            <div class="dash-card p-4 flex flex-col">
+                <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-bell text-orange-500"></i> Active Alerts
+                </h3>
+                <div class="space-y-3 flex-1 overflow-y-auto pr-1">
+                    <div class="p-3 bg-red-50 border border-red-100 rounded-lg flex gap-3 items-start">
+                        <i class="fas fa-exclamation-circle text-red-500 mt-0.5"></i>
+                        <div>
+                            <p class="text-xs font-bold text-red-800">Delayed Shipment</p>
+                            <p class="text-[10px] text-red-600">Order #ORD-9922 stuck at Toll Plaza for 45m.</p>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-yellow-50 border border-yellow-100 rounded-lg flex gap-3 items-start">
+                        <i class="fas fa-file-invoice text-yellow-600 mt-0.5"></i>
+                        <div>
+                            <p class="text-xs font-bold text-yellow-800">Missing PoD</p>
+                            <p class="text-[10px] text-yellow-700">Order #ORD-9023 delivered but PoD not uploaded.</p>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-blue-50 border border-blue-100 rounded-lg flex gap-3 items-start">
+                        <i class="fas fa-money-bill text-blue-600 mt-0.5"></i>
+                        <div>
+                            <p class="text-xs font-bold text-blue-800">Payment Pending</p>
+                            <p class="text-[10px] text-blue-700">Invoice pending for Order #ORD-9924.</p>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-gray-50 border border-gray-200 rounded-lg flex gap-3 items-start">
+                        <i class="fas fa-smog text-gray-500 mt-0.5"></i>
+                        <div>
+                            <p class="text-xs font-bold text-gray-800">High Emissions</p>
+                            <p class="text-[10px] text-gray-600">Route #R-45 showing abnormal CO2 spikes.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 6️⃣ SLIDE-OVER DETAILS PANEL (Backdrop + Panel) -->
+    <div id="panelBackdrop" class="backdrop fixed inset-0 bg-black/20 z-50 hidden" onclick="closePanel()"></div>
+    <div id="sidePanel" class="fixed inset-y-0 right-0 w-full md:w-96 bg-white shadow-2xl z-50 slide-over flex flex-col">
+        <!-- Panel Header -->
+        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+            <div>
+                <h3 class="font-bold text-gray-900 text-lg">Order #ORD-9921</h3>
+                <span class="badge badge-blue mt-1">In Transit</span>
+            </div>
+            <button onclick="closePanel()" class="text-gray-400 hover:text-red-500 transition-colors"><i class="fas fa-times text-lg"></i></button>
+        </div>
+
+        <!-- Panel Content -->
+        <div class="flex-1 overflow-y-auto p-6 space-y-6">
+            
+            <!-- Customer Info -->
+            <div>
+                <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Customer Details</h4>
+                <div class="p-3 border border-gray-200 rounded-lg">
+                    <p class="font-semibold text-gray-900 text-sm">Amazon Logistics Pvt Ltd</p>
+                    <p class="text-xs text-gray-500 mt-1"><i class="fas fa-map-marker-alt"></i> Building 4, Tech Park, Mumbai</p>
+                    <p class="text-xs text-gray-500 mt-1"><i class="fas fa-phone"></i> +91 98765 43210</p>
+                </div>
+            </div>
+
+            <!-- Route Timeline -->
+            <div>
+                <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Route Timeline</h4>
+                <div class="space-y-4 pl-2 border-l-2 border-gray-100 ml-1">
+                    <div class="relative pl-4">
+                        <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-green-500 border-2 border-white"></div>
+                        <p class="text-xs text-gray-500">Today, 10:00 AM</p>
+                        <p class="text-sm font-semibold text-gray-900">Picked Up</p>
+                        <p class="text-xs text-gray-500">Warehouse A, Mumbai</p>
+                    </div>
+                    <div class="relative pl-4">
+                        <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-blue-500 border-2 border-white"></div>
+                        <p class="text-xs text-gray-500">Today, 2:30 PM</p>
+                        <p class="text-sm font-semibold text-gray-900">In Transit</p>
+                        <p class="text-xs text-gray-500">Crossing Panvel Highway</p>
+                    </div>
+                    <div class="relative pl-4 opacity-50">
+                        <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-gray-300 border-2 border-white"></div>
+                        <p class="text-xs text-gray-500">Est. 4:00 PM</p>
+                        <p class="text-sm font-semibold text-gray-900">Delivery</p>
+                        <p class="text-xs text-gray-500">Distribution Center, Pune</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Driver & Vehicle -->
+            <div>
+                <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Driver & Fleet</h4>
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                    <div class="w-10 h-10 rounded-full bg-white border border-gray-200 overflow-hidden"><img src="https://ui-avatars.com/api/?name=Ravi+K&background=random" /></div>
+                    <div>
+                        <p class="text-sm font-bold text-gray-900">Ravi Kumar</p>
+                        <p class="text-xs text-gray-500">MH-04-AB-1234 (EV Truck)</p>
+                    </div>
+                    <button class="ml-auto text-brand-blue hover:bg-blue-50 p-2 rounded-full"><i class="fas fa-phone"></i></button>
+                </div>
+            </div>
+
+            <!-- Carbon & Payment -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="p-3 border border-green-100 bg-green-50 rounded-lg text-center">
+                    <p class="text-[10px] uppercase font-bold text-green-700">Carbon Footprint</p>
+                    <p class="text-lg font-bold text-gray-900 mt-1">12kg</p>
+                    <p class="text-[10px] text-green-600">Saved 4kg (EV)</p>
+                </div>
+                <div class="p-3 border border-gray-200 bg-gray-50 rounded-lg text-center">
+                    <p class="text-[10px] uppercase font-bold text-gray-500">Payment Status</p>
+                    <p class="text-lg font-bold text-gray-900 mt-1">$450</p>
+                    <span class="badge badge-orange text-[10px] mt-1">Pending</span>
+                </div>
+            </div>
+
+            <!-- Docs -->
+            <div>
+                <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Documents</h4>
+                <div class="flex gap-2">
+                    <button class="flex-1 py-2 border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50"><i class="fas fa-file-invoice"></i> Invoice</button>
+                    <button class="flex-1 py-2 border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 opacity-50 cursor-not-allowed"><i class="fas fa-signature"></i> PoD (Wait)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel Footer -->
+        <div class="p-4 border-t border-gray-200 bg-gray-50 flex gap-3">
+            <button class="flex-1 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium text-sm hover:bg-gray-100">Edit Order</button>
+            <button class="flex-1 py-2.5 bg-brand-blue text-white rounded-lg font-medium text-sm hover:bg-blue-700 shadow-sm">Track Live</button>
+        </div>
+    </div>
+
+    <script>
+        // Toggle Side Panel
+        const panel = document.getElementById('sidePanel');
+        const backdrop = document.getElementById('panelBackdrop');
+
+        function openPanel() {
+            backdrop.classList.remove('hidden');
+            // Small delay to allow display:block to apply before opacity transition
+            setTimeout(() => {
+                backdrop.classList.add('open');
+                panel.classList.add('open');
+            }, 10);
+        }
+
+        function closePanel() {
+            panel.classList.remove('open');
+            backdrop.classList.remove('open');
+            setTimeout(() => {
+                backdrop.classList.add('hidden');
+            }, 300); // Match transition duration
+        }
+
+        // Navigation Logic
+        function navigateTo(url) {
+            document.body.classList.add('fade-out-active');
+            setTimeout(() => {
+                window.location.href = url;
+            }, 500); // Match CSS transition duration
+        }
+    </script>
+    <script>
+  window.addEventListener("load", () => {
+    document.body.classList.add("page-loaded");
+  });
+</script>
+<script>
+  function smoothNavigate(page) {
+    document.body.classList.remove("page-loaded");
+    setTimeout(() => {
+      window.location.href = page;
+    }, 300);
+  }
+</script>
+
+
+
+</body>
+</html>
