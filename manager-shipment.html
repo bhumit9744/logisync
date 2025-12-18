@@ -131,13 +131,7 @@
 </head>
 <body class="bg-brand-bg text-brand-text font-sans antialiased min-h-screen">
     <div class="h-20"></div>
-    <nav>
-  <a href="#" onclick="smoothNavigate('manager-dashboard.html')">Dashboard</a>
-  <a href="#" onclick="smoothNavigate('manager-shipment.html')">Shipments</a>
-  <a href="#" onclick="smoothNavigate('managers-driver.html')">Drivers</a>
-  <a href="#" onclick="smoothNavigate('managers-payment.html')">Payments</a>
-  <a href="#" onclick="smoothNavigate('managers-sustainability.html')">Sustainability</a>
-</nav>
+ 
 
 
 
@@ -151,13 +145,31 @@
     </div>
 
     <!-- Links -->
-    <div class="flex gap-6 font-medium text-gray-700">
-      <a href="manager-dashboard.html" class="hover:text-cyan-600">Dashboard</a>
-      <a href="manager-shipment.html" class="hover:text-cyan-600">Shipments</a>
-      <a href="managers-driver.html" class="hover:text-cyan-600">Drivers</a>
-      <a href="managers-payment.html" class="hover:text-cyan-600">Payments</a>
-      <a href="managers-sustainability.html" class="hover:text-cyan-600">Sustainability</a>
+    <nav class="fixed top-0 left-0 w-full bg-white shadow-md z-50">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+
+    <!-- Logo -->
+    <div class="font-bold text-xl text-cyan-600">
+      LogiSync
     </div>
+
+    <!-- Navigation Links -->
+    <div class="flex gap-6 font-medium text-gray-700">
+      <a href="#" onclick="smoothNavigate('manager-dashboard.html')" class="hover:text-cyan-600">Dashboard</a>
+      <a href="#" onclick="smoothNavigate('manager-shipment.html')" class="hover:text-cyan-600">Shipments</a>
+      <a href="#" onclick="smoothNavigate('managers-driver.html')" class="hover:text-cyan-600">Drivers</a>
+      <a href="#" onclick="smoothNavigate('managers-payment.html')" class="hover:text-cyan-600">Payments</a>
+      <a href="#" onclick="smoothNavigate('managers-sustainability.html')" class="hover:text-cyan-600">Sustainability</a>
+    </div>
+
+    <!-- Logout -->
+    <button onclick="smoothNavigate('firstpage.html')"
+      class="text-sm px-4 py-2 rounded bg-cyan-600 text-white hover:bg-cyan-700">
+      Logout
+    </button>
+
+  </div>
+</nav>
 
     <!-- Logout -->
     <button onclick="window.location.href='firstpage.html'"
@@ -625,4 +637,5 @@
 
 
 </body>
+
 </html>
