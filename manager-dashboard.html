@@ -107,55 +107,79 @@
 </head>
 <body class="bg-brand-bg text-brand-text font-sans antialiased">
     <div class="h-20"></div>
-    
-    <nav class="fixed top-0 left-0 w-full bg-white shadow-md z-50">
-  <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+    <nav class="fixed top-0 left-0 w-full bg-white/90 backdrop-blur-md border-b border-gray-100 z-50 transition-all duration-300">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
 
-    <!-- Logo -->
-    <div class="font-bold text-xl text-cyan-600">
-      LogiSync
+      <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer" onclick="navigateTo('manager-dashboard.html')">
+        <div class="w-8 h-8 bg-cyan-600 rounded-lg flex items-center justify-center shadow-sm">
+          <span class="text-white font-bold text-sm">L</span>
+        </div>
+        <span class="font-bold text-xl tracking-tight text-slate-800">
+          Logi<span class="text-cyan-600">Sync</span>
+        </span>
+      </div>
+
+      <div class="hidden md:flex items-center gap-8">
+        <a href="#" onclick="navigateTo('manager-dashboard.html')" class="nav-item active">Dashboard</a>
+        <a href="#" onclick="navigateTo('manager-shipment.html')" class="nav-item">Shipments</a>
+        <a href="#" onclick="navigateTo('managers-driver.html')" class="nav-item">Drivers</a>
+        <a href="#" onclick="navigateTo('managers-payment.html')" class="nav-item">Payments</a>
+        <a href="#" onclick="navigateTo('managers-sustainability.html')" class="nav-item">Sustainability</a>
+      </div>
+
+      <div class="flex items-center">
+        <button onclick="navigateTo('index.html')"
+          class="transition-all duration-200 text-sm font-semibold px-5 py-2 rounded-md bg-cyan-600 text-white hover:bg-cyan-700 hover:shadow-md active:scale-95">
+          Logout
+        </button>
+      </div>
+
     </div>
-
-    <!-- Navigation Links -->
-    <div class="flex gap-6 font-medium text-gray-700">
-      <a href="#" onclick="smoothNavigate('manager-dashboard.html')" class="hover:text-cyan-600">Dashboard</a>
-      <a href="#" onclick="smoothNavigate('manager-shipment.html')" class="hover:text-cyan-600">Shipments</a>
-      <a href="#" onclick="smoothNavigate('managers-driver.html')" class="hover:text-cyan-600">Drivers</a>
-      <a href="#" onclick="smoothNavigate('managers-payment.html')" class="hover:text-cyan-600">Payments</a>
-      <a href="#" onclick="smoothNavigate('managers-sustainability.html')" class="hover:text-cyan-600">Sustainability</a>
-    </div>
-
-    <!-- Logout -->
-    <button onclick="smoothNavigate('index.html')"
-      class="text-sm px-4 py-2 rounded bg-cyan-600 text-white hover:bg-cyan-700">
-      Logout
-    </button>
-
   </div>
+
+  <style>
+    /* Custom styles for the navigation links */
+    .nav-item {
+      position: relative;
+      font-size: 0.875rem; /* text-sm */
+      font-weight: 500;
+      color: #475569; /* slate-600 */
+      transition: color 0.2s ease;
+      padding: 0.5rem 0;
+    }
+
+    /* Hover State */
+    .nav-item:hover {
+      color: #0891b2; /* cyan-600 */
+    }
+
+    /* The sliding underline effect */
+    .nav-item::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background-color: #0891b2;
+      transition: width 0.3s ease;
+    }
+
+    .nav-item:hover::after, 
+    .nav-item.active::after {
+      width: 100%;
+    }
+
+    /* Active State Color */
+    .nav-item.active {
+      color: #0891b2;
+    }
+  </style>
 </nav>
+    <div class="h-20"></div>
 
-    <!-- Logout -->
-    <button onclick="window.location.href='firstpage.html'"
-      class="text-sm px-4 py-2 rounded bg-cyan-600 text-white hover:bg-cyan-700">
-      Logout
-    </button>
-
-  </div>
-</nav>
-
-
-    <!-- 1️⃣ FIXED TOP NAVIGATION BAR -->
-    <nav class="fixed top-0 left-0 w-full bg-white shadow-md z-50">
-  <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-
-    <!-- Logo -->
-    <div class="font-bold text-xl text-cyan-600">
-      LogiSync
-    </div>
-
-    <!-- Links -->
     
-
     <!-- MAIN CONTENT WRAPPER -->
     <!-- Added pt-20 to push content below fixed navbar -->
     <main class="pt-24 pb-12 px-6 max-w-[1600px] mx-auto w-full space-y-8">
@@ -585,6 +609,7 @@
 </body>
 
 </html>
+
 
 
 
